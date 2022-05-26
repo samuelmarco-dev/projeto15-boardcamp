@@ -2,8 +2,11 @@
   "name": "projeto15-boardcamp",
   "version": "1.0.0",
   "description": "Projeto 15 - Boardcamp com SQL (back-end)",
+  "type": "module",
   "main": "index.js",
   "scripts": {
+    "dev": "nodemon src/index.js",
+    "start": "node src/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
