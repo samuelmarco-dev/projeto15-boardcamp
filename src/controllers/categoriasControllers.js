@@ -1,5 +1,4 @@
 import chalk from 'chalk';
-import joi from 'joi';
 
 import db from '../database.js';
 

@@ -6,7 +6,7 @@ import morgan from 'morgan';
 import chalk from 'chalk';
 
 import categoriasRouter from './routers/categoriasRouter.js';
-// import jogosRouter from './routers/jogosRouter.js';
+import jogosRouter from './routers/jogosRouter.js';
 // import clientesRouter from './routers/clientesRouter.js';
 // import alugueisRouter from './routers/alugueisRouter.js';
 
@@ -17,7 +17,7 @@ app.use(json());
 app.use(morgan('dev'));
 
 app.use(categoriasRouter);
-// app.use(jogosRouter);
+app.use(jogosRouter);
 // app.use(clientesRouter);
 // app.use(alugueisRouter);
 
