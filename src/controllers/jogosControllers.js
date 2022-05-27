@@ -23,9 +23,13 @@ async function listarTodosJogos(req, res){
                 SELECT games.*, categories.name AS "categoryName" 
                 FROM games JOIN categories ON
                 games."categoryId" = categories.id 
-                WHERE games.name LIKE = '$1%'
-            `, [name]);
+                WHERE games.name LIKE '${name}%'
+            `);
             console.log(chalk.blue('Jogos filtrados por nome'), jogosFiltrados.rows); //apagar
+            
+            if(!jogosFiltrados || jogosFiltrados.rows.length === 0){
+                return res.status(404).send(`games with parameter ${name} not found`);
+            } 
 
             res.send(jogosFiltrados.rows);
         } catch (error) {
@@ -85,17 +89,20 @@ async function inserirJogo(req, res){
         `, [categoryId]);
         
         const [categoriaId] = categoria.rows;
+        console.log(categoriaId);
         if(!categoriaId) return res.status(400).send('The id of this category does not exist');
 
         const jogo = await db.query(`
-            SELECT * FROM games WHERE games.name = $1
+            SELECT * FROM games WHERE name = $1
         `, [name]);
-        
-        const [jogoExistente] = jogo.rows;
-        if(jogoExistente) return res.status(409).send('This game already exists');
+        console.log(jogo);
 
+        const [jogoExistente] = jogo.rows;
+        console.log(jogoExistente);
+        if(jogoExistente) return res.status(409).send('This game already exists');
+        
         await db.query(`
-            INSERT INTO games (name, image, stockTotal, categoryId, pricePerDay)
+            INSERT INTO games (name, image, "stockTotal", "categoryId", "pricePerDay")
             VALUES ($1, $2, $3, $4, $5)
         `, [name, image, stockTotal, categoryId, pricePerDay]);
         res.sendStatus(201);
