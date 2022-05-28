@@ -51,4 +51,14 @@ async function listarTodosClientes(req, res){
     }
 }
 
-export { listarTodosClientes }
+async function listarClienteViaId(req, res){
+    try {
+        const {cliente} = res.locals;
+        res.send(cliente);
+    } catch (error) {
+        console.log(chalk.red('Erro de conexão')); //apagar
+        res.sendStatus(500);
+    }
+}
+
+export { listarTodosClientes, listarClienteViaId }
