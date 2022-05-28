@@ -13,7 +13,7 @@ async function jogosFiltrados(req, res, name){
         console.log(chalk.blue('Jogos filtrados por nome'), jogosFiltrados.rows); //apagar
         
         if(!jogosFiltrados || jogosFiltrados.rows.length === 0){
-            return res.status(404).send(`games with parameter ${name} not found`);
+            return res.status(404).send(`Games with parameter ${name} not found`);
         } 
 
         res.send(jogosFiltrados.rows);
