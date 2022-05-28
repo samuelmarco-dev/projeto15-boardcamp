@@ -3,16 +3,6 @@ import chalk from "chalk";
 
 import db from "../database.js";
 
-/* 
-{
-  id: 1,
-  name: 'João Alfredo',
-  phone: '21998899222',
-  cpf: '01234567890',
-  birthday: '1992-10-05'
-}
-*/
-
 async function clientesFiltrados(req, res, cpf){
     try {
         const clientesFiltrados = await db.query(`
@@ -86,7 +76,7 @@ async function inserirCliente(req, res){
     }
 
     try {
-        console.log('Posso fazer a request');
+        console.log('Posso fazer a request'); //apagar
         const clienteExiste = await db.query(`
             SELECT * FROM customers WHERE cpf = $1
         `, [cpf]);
@@ -105,4 +95,53 @@ async function inserirCliente(req, res){
     }
 }
 
-export { listarTodosClientes, listarClienteViaId, inserirCliente }
+async function atualizarCliente(req, res){
+    const {name, phone, cpf, birthday} = req.body;
+    const {id} = req.params;
+
+    const regexName = /^[a-zA-ZáéíóúàâêôãõüçÁÉÍÓÚÀÂÊÔÃÕÜÇ ]+$/;
+    const regexPhone = /^\d{10,11}$/;
+    const regexCpf = /^\d{11}$/;
+    const regexBirthday = /^\d{4}\-\d{2}\-\d{2}$/;
+
+    const schemaCliente = joi.object({
+        name: joi.string().pattern(regexName).required(),
+        phone: joi.string().pattern(regexPhone).required(),
+        cpf: joi.string().pattern(regexCpf).required(),
+        birthday: joi.string().pattern(regexBirthday).required()
+    });
+
+    const validation = schemaCliente.validate({name, phone, cpf, birthday}, {abortEarly: false});
+
+    const {error} = validation;
+    if(error){
+        console.log(chalk.red('Erro na validação do schema')); //apagar
+        return res.status(400).send(error.details.map(detail => detail.message));
+    }
+
+    try {
+        console.log('Posso fazer a request'); //apagar
+        const clienteExiste = await db.query(`
+            SELECT * FROM customers WHERE id = $1
+        `, [id]);
+
+        const [clienteId] = clienteExiste.rows;
+        console.log(clienteId, req.body); //apagar
+
+        if(!clienteId) return res.status(404).send('Client with this id does not exist in the database');
+        if(Number(clienteId.cpf) !== Number(cpf) || Number(clienteId.id) !== Number(id)) {
+            return res.status(401).send('Divergent cpf, you are not authorized to update this client');
+        }
+
+        await db.query(`
+            UPDATE customers SET name = $1, phone = $2, cpf = $3, birthday = $4
+            WHERE id = $5 and cpf = '${cpf}'
+        `, [name, phone, cpf, birthday, id]);
+        res.sendStatus(200);
+    } catch (error) {
+        console.log(chalk.red('Erro de conexão')); //apagar
+        res.sendStatus(500);
+    }
+}
+
+export { listarTodosClientes, listarClienteViaId, inserirCliente, atualizarCliente }
