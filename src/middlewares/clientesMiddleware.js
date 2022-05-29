@@ -5,7 +5,6 @@ import db from '../database.js';
 
 export async function clienteEncontrado(req, res, next){
     const {id} = req.params;    
-    console.log(id); //apagar
 
     try {
         const cliente = await db.query(`
@@ -15,7 +14,7 @@ export async function clienteEncontrado(req, res, next){
         const [clienteId] = cliente.rows;
         console.log(chalk.blue('Cliente encontrado'), clienteId); //apagar
 
-        if(!clienteId) return res.status(404).send('Customer with id not found');
+        if(!clienteId) return res.status(404).send(`Customer with id: ${id} not found`);
         res.locals.cliente = clienteId;
 
         next();
@@ -25,9 +24,24 @@ export async function clienteEncontrado(req, res, next){
     }
 }
 
+function validacaoDataNascimento(ano, mes, dia){
+    const validacaoAno = Number(ano) < 1920 || Number(ano) > 2022;
+    const validacaoMes = Number(mes) < 0 || Number(mes) > 12;
+    const validacaoDia = Number(dia) < 1 || Number(dia) > 31;
+
+    if(validacaoAno || validacaoMes || validacaoDia) return false;
+    return true;
+}
+
 export function validacaoSchemaCliente(req, res, next){
     const {name, phone, cpf, birthday} = req.body;
     const validation = schemaCliente.validate({name, phone, cpf, birthday}, {abortEarly: false});
+
+    const anoNascimento = validation.value.birthday;
+    const arrData = anoNascimento.split('-');
+    const [ano, mes, dia] = arrData;
+    const validate = validacaoDataNascimento(ano, mes, dia);
+    if(!validate) return res.status(400).send('Invalid data');
 
     const {error} = validation;
     if(error){
@@ -41,7 +55,6 @@ export async function usuarioJaCadastrado(req, res, next){
     const {cpf} = req.body;
     
     try {
-        console.log('Posso fazer a request'); //apagar
         const clienteExiste = await db.query(`
             SELECT * FROM customers WHERE cpf = $1
         `, [cpf]);
@@ -56,11 +69,10 @@ export async function usuarioJaCadastrado(req, res, next){
 }
 
 export async function usuarioEncontrado(req, res, next){
-    const {id} = req.params;
     const {cpf} = req.body;
+    const {id} = req.params;
     
     try {
-        console.log('Posso fazer a request'); //apagar
         const clienteExiste = await db.query(`
             SELECT * FROM customers WHERE id = $1
         `, [id]);
