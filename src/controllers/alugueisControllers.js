@@ -1,3 +1,5 @@
+import chalk from "chalk";
+
 import db from "../database.js";
 
 /* 
@@ -13,3 +15,42 @@ import db from "../database.js";
 }
 */
 
+async function listarAluguel(req, res){  
+    try {
+        
+    } catch (error) {
+        console.log(chalk.red('Erro de conexão')); //apagar
+        res.sendStatus(500);
+    }
+}
+
+async function inserirAluguel(req, res){
+    const { customerId, gameId, daysRented } = req.body;
+    
+    try {
+        
+    } catch (error) {
+        console.log(chalk.red('Erro de conexão')); //apagar
+        res.sendStatus(500);
+    }
+}
+
+async function finalizarAluguel(req, res){  
+    try {
+        
+    } catch (error) {
+        console.log(chalk.red('Erro de conexão')); //apagar
+        res.sendStatus(500);
+    }
+}
+
+async function deletarAluguel(req, res){  
+    try {
+        
+    } catch (error) {
+        console.log(chalk.red('Erro de conexão')); //apagar
+        res.sendStatus(500);
+    }
+}
+
+export { listarAluguel, inserirAluguel, finalizarAluguel, deletarAluguel }
