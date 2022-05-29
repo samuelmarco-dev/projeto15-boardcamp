@@ -1,6 +1,6 @@
 import chalk from "chalk";
 
-import { schemaJogo } from "../schemas/jogosSchema.js";
+import { schemaJogo } from "../schemas/jogoSchema.js";
 import db from "../database.js";
 
 export function validacaoSchemaJogo(req, res, next){

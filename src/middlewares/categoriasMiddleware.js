@@ -1,7 +1,7 @@
 import chalk from 'chalk';
 
 import db from '../database.js';
-import { schemaCategoteria } from "../schemas/categoriasSchema.js";
+import { schemaCategoteria } from "../schemas/categoriaSchema.js";
 
 export function validacaoSchemaCategoria(req, res, next){
     const {name} = req.body;
