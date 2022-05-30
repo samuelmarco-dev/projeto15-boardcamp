@@ -5,7 +5,7 @@ import db from "../database.js";
 async function clientesFiltrados(req, res, cpf){
     try {
         const clientesFiltrados = await db.query(`
-            SELECT * FROM customers WHERE cpf LIKE '${cpf}%'
+            SELECT * FROM customers WHERE cpf ILIKE '${cpf}%'
         `);
 
         if(!clientesFiltrados || clientesFiltrados.rows.length === 0){

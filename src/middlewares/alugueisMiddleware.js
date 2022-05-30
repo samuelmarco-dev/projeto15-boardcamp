@@ -127,7 +127,7 @@ export async function verificarUpdate(req, res, next){
         const dataEntregaReal = dayjs().format('YYYY-MM-DD'); 
 
         let multaAtraso;
-        if(dataEntregaReal < dataEntrega){
+        if(dataEntregaReal <= dataEntrega){
             multaAtraso = null;
         }else{
             const diferencaTempo = dataEntregaReal.getTime() - dataEntrega.getTime();

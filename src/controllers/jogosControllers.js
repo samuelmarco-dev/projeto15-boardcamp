@@ -8,7 +8,7 @@ async function jogosFiltrados(req, res, name){
             SELECT games.*, categories.name AS "categoryName" 
             FROM games JOIN categories ON
             games."categoryId" = categories.id 
-            WHERE games.name LIKE '${name}%'
+            WHERE games.name ILIKE '${name}%'
         `);
         
         if(!jogosFiltrados || jogosFiltrados.rows.length === 0){
