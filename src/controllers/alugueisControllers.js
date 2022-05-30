@@ -96,6 +96,7 @@ async function listarAluguel(req, res){
         }
 
         const alugueisEncontrados = getAlugueisEncontrados.rows;
+        console.log(alugueisEncontrados); //apagar
         if(!alugueisEncontrados || alugueisEncontrados.length === 0) return res.status(404).send(`Rental not found`);
 
         const alugueis = alugueisEncontrados.map(construcaoAluguelObj);
@@ -130,16 +131,19 @@ async function inserirAluguel(req, res){
         `, [customerId]);
         const [clienteId] = cliente.rows;
         if(!clienteId) return res.status(404).send(`Customer with id: ${customerId} not found`);
+        console.log(clienteId); //apagar
 
         const jogo = await db.query(`
             SELECT * FROM games WHERE id = $1
         `, [gameId]);
         const [jogoId] = jogo.rows;
         if(!jogoId) return res.status(404).send(`Game with id: ${gameId} not found`);
+        console.log(jogoId); //apagar
 
         const aluguel = await db.query(`
             SELECT * FROM rentals WHERE "gameId" = $1 AND "returnDate" IS NULL
         `, [gameId]);
+        console.log(aluguel.rows); //apagar
 
         if(jogoId.stockTotal > aluguel.rows.length){
             const precoDia = await db.query(`
@@ -147,10 +151,11 @@ async function inserirAluguel(req, res){
             `, [gameId]);
             const [precoDiaId] = precoDia.rows;
             if(!precoDiaId) return res.status(404).send(`Game with id: ${gameId} not found`);
+            console.log(precoDiaId); //apagar
 
             const precoTotal = precoDiaId.pricePerDay * daysRented;
             await db.query(`
-                SELECT INTO rentals 
+                INSERT INTO rentals 
                 ("customerId", "gameId", "rentDate", "daysRented", "returnDate", "originalPrice", "delayFee")
                 VALUES ($1, $2, $3, $4, $5, $6, $7)
             `, [customerId, gameId, dataAluguel, daysRented, dataDevolucao, precoTotal, multaAtraso]);
@@ -176,6 +181,7 @@ async function finalizarAluguel(req, res){
         const [aluguelId] = aluguel.rows;
         if(!aluguelId) return res.status(404).send(`Rental with id: ${id} not found`);
         if(aluguelId.returnDate !== null) return res.status(400).send(`Rental with id: ${id} already returned`);
+        console.log(aluguelId); //apagar
 
         const findAluguelJogo = await db.query(`
             SELECT * FROM rentals WHERE id = $1
@@ -185,6 +191,7 @@ async function finalizarAluguel(req, res){
         const [findAluguelJogoId] = findAluguelJogo.rows;
         if(!findAluguelJogoId) return res.status(404).send(`Rental with id: ${id} not found`);
         if(findAluguelJogoId.returnDate !== null) return res.status(400).send(`Rental with id ${id} already returned`);
+        console.log(findAluguelJogoId); //apagar
 
         const jogo = await db.query(`
             SELECT * FROM games WHERE id = $1
@@ -192,11 +199,15 @@ async function finalizarAluguel(req, res){
         
         const [jogoId] = jogo.rows;
         if(!jogoId) return res.status(404).send(`Game with id: ${aluguelId.gameId} not found`);
+        console.log(jogoId); //apagar
 
         const dataAluguel = dayjs(aluguelId.rentDate).format('YYYY-MM-DD'); 
-        const diasAlugado = aluguelId.daysRented; 
+        const diasAlugado = aluguelId.daysRented;
+        console.log(dataAluguel, diasAlugado); //apagar
+        
         const dataEntrega = dayjs(dataAluguel).add(diasAlugado, 'day').format('YYYY-MM-DD'); 
-        const dataEntregaReal = dayjs.format('YYYY-MM-DD'); 
+        const dataEntregaReal = dayjs().format('YYYY-MM-DD'); 
+        console.log(dataEntrega, dataEntregaReal); //apagar
 
         let multaAtraso;
         if(dataEntregaReal < dataEntrega){
@@ -208,6 +219,7 @@ async function finalizarAluguel(req, res){
             multaAtraso = diferencaDias * precoDia;
         }
 
+        console.log(multaAtraso); //apagar
         await db.query(`
             UPDATE rentals SET "customerId" = $1, "gameId" = $2, "rentDate" = $3, 
             "daysRented" = $4, "returnDate" = $5, "originalPrice" = $6, "delayFee" = $7
