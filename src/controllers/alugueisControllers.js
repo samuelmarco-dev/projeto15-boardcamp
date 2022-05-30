@@ -85,8 +85,58 @@ async function inserirAluguel(req, res){
 }
 
 async function finalizarAluguel(req, res){  
+    const {id} = req.params;
+    const dataDevolucao = dayjs().format('YYYY-MM-DD');
+    
     try {
+        const aluguel = await db.query(`
+            SELECT * FROM rentals WHERE id = $1
+        `, [id]);
         
+        const [aluguelId] = aluguel.rows;
+        if(!aluguelId) return res.status(404).send(`Rental with id: ${id} not found`);
+        if(aluguelId.returnDate !== null) return res.status(400).send(`Rental with id: ${id} already returned`);
+
+        const findAluguelJogo = await db.query(`
+            SELECT * FROM rentals WHERE id = $1
+            AND "customerId" = $2 AND "gameId" = $3
+        `, [id, aluguelId.customerId, aluguelId.gameId]); 
+        
+        const [findAluguelJogoId] = findAluguelJogo.rows;
+        if(!findAluguelJogoId) return res.status(404).send(`Rental with id: ${id} not found`);
+        if(findAluguelJogoId.returnDate !== null) return res.status(400).send(`Rental with id ${id} already returned`);
+
+        const jogo = await db.query(`
+            SELECT * FROM games WHERE id = $1
+        `, [aluguelId.gameId]); 
+        
+        const [jogoId] = jogo.rows;
+        if(!jogoId) return res.status(404).send(`Game with id: ${aluguelId.gameId} not found`);
+
+        const dataAluguel = dayjs(aluguelId.rentDate).format('YYYY-MM-DD'); 
+        const diasAlugado = aluguelId.daysRented; 
+        const dataEntrega = dayjs(dataAluguel).add(diasAlugado, 'day').format('YYYY-MM-DD'); 
+        const dataEntregaReal = dayjs.format('YYYY-MM-DD'); 
+
+        let multaAtraso;
+        if(dataEntregaReal < dataEntrega){
+            multaAtraso = null;
+        }else{
+            const diferencaTempo = dataEntregaReal.getTime() - dataEntrega.getTime();
+            const diferencaDias = Number(diferencaTempo / (1000 * 60 * 60 * 24));
+            const precoDia = jogoId.pricePerDay;
+            multaAtraso = diferencaDias * precoDia;
+        }
+
+        await db.query(`
+            UPDATE rentals SET "customerId" = $1, "gameId" = $2, "rentDate" = $3, 
+            "daysRented" = $4, "returnDate" = $5, "originalPrice" = $6, "delayFee" = $7
+            WHERE id = $8
+        `, [
+            aluguelId.customerId, aluguelId.gameId, dayjs(aluguelId.rentDate).format('YYYY-MM-DD'), 
+            aluguelId.daysRented, dataDevolucao, aluguelId.originalPrice, multaAtraso, aluguelId.id
+        ]);
+        res.sendStatus(200);
     } catch (error) {
         console.log(chalk.red('Erro de conexão')); //apagar
         res.sendStatus(500);
