@@ -7,8 +7,6 @@ async function listarTodasCategorias(req, res){
         const categorias = await db.query(`
             SELECT * FROM categories
         `);
-        console.log(chalk.blue('Categorias encontradas'),  categorias.rows); //apagar
-
         res.send(categorias.rows);
     } catch (error) {
         console.log(chalk.red('Erro de conexão')); //apagar

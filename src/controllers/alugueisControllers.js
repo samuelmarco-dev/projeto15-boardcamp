@@ -54,19 +54,16 @@ async function inserirAluguel(req, res){
         `, [customerId]);
         const [clienteId] = cliente.rows;
         if(!clienteId) return res.status(404).send(`Customer with id: ${customerId} not found`);
-        console.log(clienteId); //apagar
 
         const jogo = await db.query(`
             SELECT * FROM games WHERE id = $1
         `, [gameId]);
         const [jogoId] = jogo.rows;
         if(!jogoId) return res.status(404).send(`Game with id: ${gameId} not found`);
-        console.log(jogoId); //apagar
 
         const aluguel = await db.query(`
             SELECT * FROM rentals WHERE "gameId" = $1 AND "returnDate" IS NULL
         `, [gameId]);
-        console.log(aluguel.rows); //apagar
 
         if(jogoId.stockTotal > aluguel.rows.length){
             const precoDia = await db.query(`
@@ -74,7 +71,6 @@ async function inserirAluguel(req, res){
             `, [gameId]);
             const [precoDiaId] = precoDia.rows;
             if(!precoDiaId) return res.status(404).send(`Game with id: ${gameId} not found`);
-            console.log(precoDiaId); //apagar
 
             const precoTotal = precoDiaId.pricePerDay * daysRented;
             await db.query(`

@@ -10,13 +10,11 @@ export async function clienteEncontrado(req, res, next){
         const cliente = await db.query(`
             SELECT * FROM customers WHERE id = $1
         `, [id]);
-
+        
         const [clienteId] = cliente.rows;
-        console.log(chalk.blue('Cliente encontrado'), clienteId); //apagar
-
         if(!clienteId) return res.status(404).send(`Customer with id: ${id} not found`);
+        
         res.locals.cliente = clienteId;
-
         next();
     } catch (error) {
         console.log(chalk.red('Erro de conexão')); //apagar
@@ -45,7 +43,6 @@ export function validacaoSchemaCliente(req, res, next){
 
     const {error} = validation;
     if(error){
-        console.log(chalk.red('Erro na validação do schema')); //apagar
         return res.status(400).send(error.details.map(detail => detail.message));
     }
     next();
@@ -76,9 +73,7 @@ export async function usuarioEncontrado(req, res, next){
         const clienteExiste = await db.query(`
             SELECT * FROM customers WHERE id = $1
         `, [id]);
-
         const [clienteId] = clienteExiste.rows;
-        console.log(clienteId, req.body); //apagar
 
         if(!clienteId) return res.status(404).send('Client with this id does not exist in the database');
         if(Number(clienteId.cpf) !== Number(cpf) || Number(clienteId.id) !== Number(id)) {

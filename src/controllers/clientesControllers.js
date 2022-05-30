@@ -7,12 +7,10 @@ async function clientesFiltrados(req, res, cpf){
         const clientesFiltrados = await db.query(`
             SELECT * FROM customers WHERE cpf LIKE '${cpf}%'
         `);
-        console.log(chalk.blue('Clientes filtrados'), clientesFiltrados.rows); //apagar
 
         if(!clientesFiltrados || clientesFiltrados.rows.length === 0){
             return res.status(404).send(`Customers with parameter cpf: ${cpf} not found`);
         }
-
         res.send(clientesFiltrados.rows);
     } catch (error) {
         console.log(chalk.red('Erro de conexão')); //apagar
@@ -30,8 +28,6 @@ async function listarTodosClientes(req, res){
             const clientes = await db.query(`
                 SELECT * FROM customers
             `);
-            console.log(chalk.blue('Clientes encontrados'), clientes.rows); //apagar
-
             res.send(clientes.rows);
         } catch (error) {
             console.log(chalk.red('Erro de conexão')); //apagar

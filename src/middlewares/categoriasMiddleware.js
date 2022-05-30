@@ -1,5 +1,3 @@
-import chalk from 'chalk';
-
 import db from '../database.js';
 import { schemaCategoteria } from "../schemas/categoriaSchema.js";
 
@@ -9,7 +7,6 @@ export function validacaoSchemaCategoria(req, res, next){
     
     const {error} = validation;
     if(error){
-        console.log(chalk.red('Erro na validação do schema')); //apagar
         return res.status(400).send(error.details.map(detail => detail.message));
     }
     next();
@@ -26,7 +23,6 @@ export async function categoriaJaExistente(req, res, next){
         const categoriaExistente = array.find(item => item.name === name);
         
         if(categoriaExistente){
-            console.log(chalk.red('Categoria já existente'), categoriaExistente); //apagar
             return res.status(409).send('This category already exists');
         }
         next();

@@ -88,7 +88,6 @@ export function validacaoSchemaAluguel(req, res, next){
 
     const {error} = validation;
     if(error){
-        console.log(chalk.red('Erro de validação')); //apagar
         return res.status(400).send(error.details.map(detail => detail.message));
     }
     next();
@@ -105,7 +104,6 @@ export async function verificarUpdate(req, res, next){
         const [aluguelId] = aluguel.rows;
         if(!aluguelId) return res.status(404).send(`Rental with id: ${id} not found`);
         if(aluguelId.returnDate !== null) return res.status(400).send(`Rental with id: ${id} already returned`);
-        console.log(aluguelId); //apagar
 
         const findAluguelJogo = await db.query(`
             SELECT * FROM rentals WHERE id = $1
@@ -115,7 +113,6 @@ export async function verificarUpdate(req, res, next){
         const [findAluguelJogoId] = findAluguelJogo.rows;
         if(!findAluguelJogoId) return res.status(404).send(`Rental with id: ${id} not found`);
         if(findAluguelJogoId.returnDate !== null) return res.status(400).send(`Rental with id ${id} already returned`);
-        console.log(findAluguelJogoId); //apagar
 
         const jogo = await db.query(`
             SELECT * FROM games WHERE id = $1
@@ -123,15 +120,11 @@ export async function verificarUpdate(req, res, next){
         
         const [jogoId] = jogo.rows;
         if(!jogoId) return res.status(404).send(`Game with id: ${aluguelId.gameId} not found`);
-        console.log(jogoId); //apagar
 
         const dataAluguel = dayjs(aluguelId.rentDate).format('YYYY-MM-DD'); 
         const diasAlugado = aluguelId.daysRented;
-        console.log(dataAluguel, diasAlugado); //apagar
-        
         const dataEntrega = dayjs(dataAluguel).add(diasAlugado, 'day').format('YYYY-MM-DD'); 
         const dataEntregaReal = dayjs().format('YYYY-MM-DD'); 
-        console.log(dataEntrega, dataEntregaReal); //apagar
 
         let multaAtraso;
         if(dataEntregaReal < dataEntrega){
@@ -142,7 +135,6 @@ export async function verificarUpdate(req, res, next){
             const precoDia = jogoId.pricePerDay;
             multaAtraso = diferencaDias * precoDia;
         }
-        console.log(multaAtraso); //apagar
 
         res.locals.aluguelId = aluguelId;
         res.locals.multaAtraso = multaAtraso;
