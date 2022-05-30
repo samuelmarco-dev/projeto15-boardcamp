@@ -17,9 +17,89 @@ import db from "../database.js";
 }
 */
 
+function construcaoAluguelObj(array){
+    console.log(array); //apagar
+    const [
+        id, customerId, gameId, rentDate, daysRented, returnDate, originalPrice, 
+        delayFee, customerName, gameName, categoryId, categoryName
+    ] = array;
+
+    return {
+        id,
+        customerId,
+        gameId,
+        rentDate,
+        daysRented,
+        returnDate,
+        originalPrice,
+        delayFee,
+        customer: {
+          id: customerId,
+          name: customerName
+        },
+        game: {
+          id: gameId,
+          name: gameName,
+          categoryId,
+          categoryName
+        }
+    }
+}
+
 async function listarAluguel(req, res){  
+    const {customerId, gameId} = req.query;
+    let getAlugueisEncontrados;
+
     try {
-        
+        if(customerId){
+            getAlugueisEncontrados = await db.query({
+                text: `
+                SELECT rentals.*, customers.name, games.name, categories.* FROM rentals
+                JOIN customers ON customers.id = rentals."customerId"
+                JOIN games ON games.id = rentals."gameId"
+                JOIN categories ON categories.id = games."categoryId"
+                WHERE rentals."customerId" = $1
+            `, rowMode: 'array'
+            }, [customerId]);
+        }
+        if(gameId){
+            getAlugueisEncontrados = await db.query({
+                text: `
+                SELECT rentals.*, customers.name, games.name, categories.* FROM rentals
+                JOIN customers ON customers.id = rentals."customerId"
+                JOIN games ON games.id = rentals."gameId"
+                JOIN categories ON categories.id = games."categoryId"
+                WHERE rentals."gameId" = $1
+            `, rowMode: 'array'
+            }, [gameId]);
+        }
+        if(customerId && gameId){
+            getAlugueisEncontrados = await db.query({
+                text: `
+                SELECT rentals.*, customers.name, games.name, categories.* FROM rentals
+                JOIN customers ON customers.id = rentals."customerId"
+                JOIN games ON games.id = rentals."gameId"
+                JOIN categories ON categories.id = games."categoryId"
+                WHERE rentals."customerId" = $1 AND rentals."gameId" = $2
+            `, rowMode: 'array'
+            }, [customerId, gameId]);
+        }
+        if(!customerId && !gameId){
+            getAlugueisEncontrados = await db.query({
+                text: `
+                SELECT rentals.*, customers.name, games.name, categories.* FROM rentals
+                JOIN customers ON customers.id = rentals."customerId"
+                JOIN games ON games.id = rentals."gameId"
+                JOIN categories ON categories.id = games."categoryId"
+            `, rowMode: 'array'
+            });
+        }
+
+        const alugueisEncontrados = getAlugueisEncontrados.rows;
+        if(!alugueisEncontrados || alugueisEncontrados.length === 0) return res.status(404).send(`Rental not found`);
+
+        const alugueis = alugueisEncontrados.map(construcaoAluguelObj);
+        res.send(alugueis);
     } catch (error) {
         console.log(chalk.red('Erro de conexão')); //apagar
         res.sendStatus(500);
