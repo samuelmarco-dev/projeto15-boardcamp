@@ -61,9 +61,9 @@ async function inserirAluguel(req, res){
             SELECT * FROM rentals WHERE "gameId" = $1 AND "returnDate" IS NULL
         `, [gameId]);
 
-        if(jogo.stockTotal > aluguel.rows.length){
+        if(jogoId.stockTotal > aluguel.rows.length){
             const precoDia = await db.query(`
-                SELECT * FROM games WHERE id = $1
+                SELECT games."pricePerDay" FROM games WHERE id = $1
             `, [gameId]);
             const [precoDiaId] = precoDia.rows;
             if(!precoDiaId) return res.status(404).send(`Game with id: ${gameId} not found`);
